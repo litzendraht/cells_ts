@@ -60,7 +60,7 @@ async function main() {
 		computeOutTexture,
 	};
 
-	const camera = new Camera(canvas);
+	const camera = new Camera(canvas, window);
 
 	initCompute(simulationState);
 	initRender(camera, simulationState, format);

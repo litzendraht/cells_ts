@@ -19,7 +19,7 @@ export function initRender(
 	const cameraStateBufferSize =
 		1 * 4 + // f32 for zoom
 		2 * 4 + // 2 f32's for offset
-		1 * 4; // padding
+		1 * 4; // f32 for aspectRatio
 	const cameraStateBuffer = state.device.createBuffer({
 		label: "Camera Uniform Buffer",
 		size: cameraStateBufferSize,
@@ -27,7 +27,12 @@ export function initRender(
 	});
 
 	const cameraStateValues = new Float32Array(cameraStateBufferSize / 4);
-	cameraStateValues.set([camera.zoom, camera.offsetX, camera.offsetY, 0]);
+	cameraStateValues.set([
+		camera.zoom,
+		camera.offsetX,
+		camera.offsetY,
+		camera.aspectRatio,
+	]);
 
 	const bindGroupLayout = state.device.createBindGroupLayout({
 		label: "Render Bind Group Layout",
@@ -72,9 +77,16 @@ export function initRender(
 	});
 
 	function updateCameraBuffer() {
-		cameraStateValues.set([camera.zoom, camera.offsetX, camera.offsetY, 0]);
+		cameraStateValues.set([
+			camera.zoom,
+			camera.offsetX,
+			camera.offsetY,
+			camera.aspectRatio,
+		]);
 		state.device.queue.writeBuffer(cameraStateBuffer, 0, cameraStateValues);
 	}
+	// Initializing unform buffer on the GPU.
+	updateCameraBuffer();
 	camera.onChange = updateCameraBuffer;
 
 	const pipelineLayout = state.device.createPipelineLayout({

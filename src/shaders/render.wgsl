@@ -5,7 +5,9 @@ var in_sampler: sampler;
 
 struct CameraState {
     zoom: f32,
-    offset: vec2f,
+    offset_x: f32,
+    offset_y: f32,
+    aspect_ratio: f32,
 }
 
 @group(0) @binding(2)
@@ -31,6 +33,7 @@ fn vs_main(@builtin(vertex_index) idx: u32) -> VertexOutput {
 
 @fragment
 fn fs_main(@location(0) tex_coords: vec2f) -> @location(0) vec4f {
-    let corrected_tex_coords = tex_coords + camera_state.offset;
+    var corrected_tex_coords = (tex_coords - vec2f(0.5, 0.5)) / camera_state.zoom + vec2f(0.5, 0.5) - vec2f(camera_state.offset_x, -camera_state.offset_y);
+    corrected_tex_coords.x = corrected_tex_coords.x / camera_state.aspect_ratio;
     return textureSample(in_texture, in_sampler, corrected_tex_coords);
 }

@@ -2,16 +2,26 @@ export class Camera {
 	zoom = 1.0;
 	offsetX = 0;
 	offsetY = 0;
+	aspectRatio = 1.0;
 	private isDragging = false;
 	private draggingSpeed = 0.01;
 	private lastX = 0;
 	private lastY = 0;
 
-	constructor(private canvas: HTMLCanvasElement) {
+	constructor(
+		private canvas: HTMLCanvasElement,
+		private window: Window,
+	) {
 		this.setupEvents();
 	}
 
 	private setupEvents() {
+		this.window.addEventListener("resize", () => {
+			// aspectRatio, defined in this way doesn't change scale if only the width is changed.
+			this.aspectRatio = this.canvas.height / this.canvas.width;
+			this.onChange();
+		});
+
 		this.canvas.addEventListener("mousedown", (e) => {
 			if (e.button === 0) {
 				this.isDragging = true;
