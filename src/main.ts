@@ -2,7 +2,7 @@ import "./style.css";
 
 import { WORKGROUP_SIZE } from "./compute";
 
-const GRID_SIZE = 256;
+const GRID_SIZE = 512;
 
 import { Camera } from "./camera";
 import { computePass, initCompute } from "./compute";

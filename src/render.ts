@@ -14,6 +14,8 @@ export function initRender(
 
 	const sampler = state.device.createSampler({
 		label: "Render Sampler",
+		addressModeU: "repeat",
+		addressModeV: "repeat",
 	});
 
 	const cameraStateBufferSize =
