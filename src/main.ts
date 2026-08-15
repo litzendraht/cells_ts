@@ -4,6 +4,7 @@ import { WORKGROUP_SIZE } from "./compute";
 
 const GRID_SIZE = 256;
 
+import { Camera } from "./camera";
 import { computePass, initCompute } from "./compute";
 import { initRender, renderPass } from "./render";
 import type { SimulationState } from "./state";
@@ -52,15 +53,17 @@ async function main() {
 			GPUTextureUsage.COPY_SRC,
 	});
 
-	const state: SimulationState = {
+	const simulationState: SimulationState = {
 		device,
 		gridSize: GRID_SIZE,
 		computeInTexture,
 		computeOutTexture,
 	};
 
-	initCompute(state);
-	initRender(state, format);
+	const camera = new Camera(canvas);
+
+	initCompute(simulationState);
+	initRender(camera, simulationState, format);
 
 	function resizeCanvas() {
 		const dpr = window.devicePixelRatio || 1;
@@ -78,8 +81,8 @@ async function main() {
 	function frame() {
 		const encoder = device.createCommandEncoder();
 
-		computePass(encoder, state);
-		renderPass(encoder, state, context);
+		computePass(encoder, simulationState);
+		renderPass(encoder, simulationState, context);
 
 		device.queue.submit([encoder.finish()]);
 		requestAnimationFrame(frame);

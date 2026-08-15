@@ -3,9 +3,17 @@ var in_texture: texture_2d<f32>;
 @group(0) @binding(1)
 var in_sampler: sampler;
 
+struct CameraState {
+    zoom: f32,
+    offset: vec2f,
+}
+
+@group(0) @binding(2)
+var<uniform> camera_state: CameraState;
+
 struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(0) clip_pos: vec2<f32>,
+    @builtin(position) position: vec4f,
+    @location(0) clip_pos: vec2f,
 }
 
 @vertex
@@ -22,6 +30,7 @@ fn vs_main(@builtin(vertex_index) idx: u32) -> VertexOutput {
 }
 
 @fragment
-fn fs_main(@location(0) tex_coords: vec2<f32>) -> @location(0) vec4<f32> {
-    return textureSample(in_texture, in_sampler, tex_coords);
+fn fs_main(@location(0) tex_coords: vec2f) -> @location(0) vec4f {
+    let corrected_tex_coords = tex_coords + camera_state.offset;
+    return textureSample(in_texture, in_sampler, corrected_tex_coords);
 }

@@ -12,7 +12,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3u) {
     if (global_id.x >= dimensions.x || global_id.y >= dimensions.y) { 
         return; 
     }
-    let out_coords = vec2<i32>(i32(global_id.x), i32(global_id.y));
+    let out_coords = vec2i(i32(global_id.x), i32(global_id.y));
 
     let shifts = array(
         vec2i( 1,  0),
@@ -28,7 +28,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3u) {
     for (var i = 0; i < 8; i++) {
         let x = (out_coords.x + shifts[i].x) % i32(dimensions.x);
         let y = (out_coords.y + shifts[i].y) % i32(dimensions.y);
-        let shift_coords = vec2<i32>(x, y);
+        let shift_coords = vec2i(x, y);
         let shift_value = textureLoad(in_texture, shift_coords);
         // If cell is alive, alive color was stored in the texel.
         if all(shift_value == ALIVE_COLOR) {

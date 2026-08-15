@@ -1,11 +1,12 @@
+import type { Camera } from "./camera";
 import shaderCode from "./shaders/render.wgsl?raw";
-
 import type { SimulationState } from "./state";
 
 let bindGroup: GPUBindGroup;
 let pipeline: GPURenderPipeline;
 
 export function initRender(
+	camera: Camera,
 	state: SimulationState,
 	canvasFormat: GPUTextureFormat,
 ) {
@@ -14,6 +15,19 @@ export function initRender(
 	const sampler = state.device.createSampler({
 		label: "Render Sampler",
 	});
+
+	const cameraStateBufferSize =
+		1 * 4 + // f32 for zoom
+		2 * 4 + // 2 f32's for offset
+		1 * 4; // padding
+	const cameraStateBuffer = state.device.createBuffer({
+		label: "Camera Uniform Buffer",
+		size: cameraStateBufferSize,
+		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+	});
+
+	const cameraStateValues = new Float32Array(cameraStateBufferSize / 4);
+	cameraStateValues.set([camera.zoom, camera.offsetX, camera.offsetY, 0]);
 
 	const bindGroupLayout = state.device.createBindGroupLayout({
 		label: "Render Bind Group Layout",
@@ -27,6 +41,13 @@ export function initRender(
 				binding: 1,
 				visibility: GPUShaderStage.FRAGMENT,
 				sampler: {},
+			},
+			{
+				binding: 2,
+				visibility: GPUShaderStage.FRAGMENT,
+				buffer: {
+					type: "uniform",
+				},
 			},
 		],
 	});
@@ -43,8 +64,18 @@ export function initRender(
 				binding: 1,
 				resource: sampler,
 			},
+			{
+				binding: 2,
+				resource: cameraStateBuffer,
+			},
 		],
 	});
+
+	function updateCameraBuffer() {
+		cameraStateValues.set([camera.zoom, camera.offsetX, camera.offsetY, 0]);
+		state.device.queue.writeBuffer(cameraStateBuffer, 0, cameraStateValues);
+	}
+	camera.onChange = updateCameraBuffer;
 
 	const pipelineLayout = state.device.createPipelineLayout({
 		label: "Render Pipeline Layout",
