@@ -8,6 +8,12 @@ import { Camera } from "./camera";
 import { computePass, initCompute } from "./compute";
 import { initRender, renderPass } from "./render";
 import type { SimulationState } from "./state";
+import { simParams } from "./ui";
+
+// CA step timekeeping.
+// TODO seems ugly to hold this in a global outside main.
+let lastFrameTime = performance.now();
+let timeSinceLastStep = 0;
 
 async function main() {
 	if (!navigator.gpu) {
@@ -81,7 +87,18 @@ async function main() {
 	function frame() {
 		const encoder = device.createCommandEncoder();
 
-		computePass(encoder, simulationState);
+		const delta = performance.now() - lastFrameTime;
+		lastFrameTime = performance.now();
+
+		if (!simParams.paused) {
+			timeSinceLastStep += delta;
+
+			if (timeSinceLastStep >= simParams.timestep) {
+				console.log("CA step");
+				computePass(encoder, simulationState);
+				timeSinceLastStep = 0;
+			}
+		}
 		renderPass(encoder, simulationState, context);
 
 		device.queue.submit([encoder.finish()]);

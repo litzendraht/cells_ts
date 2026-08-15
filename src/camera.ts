@@ -16,11 +16,14 @@ export class Camera {
 	}
 
 	private setupEvents() {
-		this.window.addEventListener("resize", () => {
-			// aspectRatio, defined in this way doesn't change scale if only the width is changed.
-			this.aspectRatio = this.canvas.height / this.canvas.width;
-			this.onChange();
+		const resizeObserver = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const { width, height } = entry.contentRect;
+				this.aspectRatio = height / width;
+				this.onChange();
+			}
 		});
+		resizeObserver.observe(this.canvas);
 
 		this.canvas.addEventListener("mousedown", (e) => {
 			if (e.button === 0) {
