@@ -1,6 +1,6 @@
+import type { SimContext } from "../ca_sim";
+import type { SimResources, SimState } from "./main";
 import shaderCode from "./shaders/compute.wgsl?raw";
-
-import type { SimulationState } from "./state";
 
 export const WORKGROUP_SIZE = 16;
 
@@ -9,8 +9,12 @@ const getRandomBoolean = (): boolean => Math.random() < 0.5;
 let bindGroup: GPUBindGroup;
 let pipeline: GPUComputePipeline;
 
-export function initCompute(state: SimulationState) {
-	const shaderModule = state.device.createShaderModule({ code: shaderCode });
+export function initCompute(
+	state: SimState,
+	ctx: SimContext,
+	res: SimResources,
+) {
+	const shaderModule = ctx.device.createShaderModule({ code: shaderCode });
 
 	const DATA_SIZE = state.gridSize * state.gridSize;
 	const data = new Uint8Array(DATA_SIZE * 4);
@@ -24,9 +28,9 @@ export function initCompute(state: SimulationState) {
 		data[offset + 3] = 255;
 	}
 
-	state.device.queue.writeTexture(
+	ctx.device.queue.writeTexture(
 		{
-			texture: state.computeInTexture,
+			texture: res.computeInTexture,
 		},
 		data,
 		{
@@ -39,7 +43,7 @@ export function initCompute(state: SimulationState) {
 		},
 	);
 
-	const bindGroupLayout = state.device.createBindGroupLayout({
+	const bindGroupLayout = ctx.device.createBindGroupLayout({
 		label: "Compute Bind Group Layout",
 		entries: [
 			{
@@ -61,27 +65,27 @@ export function initCompute(state: SimulationState) {
 		],
 	});
 
-	bindGroup = state.device.createBindGroup({
+	bindGroup = ctx.device.createBindGroup({
 		label: "Compute Bind Group",
 		layout: bindGroupLayout,
 		entries: [
 			{
 				binding: 0,
-				resource: state.computeInTexture,
+				resource: res.computeInTexture,
 			},
 			{
 				binding: 1,
-				resource: state.computeOutTexture,
+				resource: res.computeOutTexture,
 			},
 		],
 	});
 
-	const pipelineLayout = state.device.createPipelineLayout({
+	const pipelineLayout = ctx.device.createPipelineLayout({
 		label: "Compute Pipeline Layout",
 		bindGroupLayouts: [bindGroupLayout],
 	});
 
-	pipeline = state.device.createComputePipeline({
+	pipeline = ctx.device.createComputePipeline({
 		label: "Compute Pipeline",
 		layout: pipelineLayout,
 		compute: {
@@ -93,7 +97,8 @@ export function initCompute(state: SimulationState) {
 
 export function computePass(
 	encoder: GPUCommandEncoder,
-	state: SimulationState,
+	state: SimState,
+	res: SimResources,
 ) {
 	const pass = encoder.beginComputePass();
 	pass.setPipeline(pipeline);
@@ -106,10 +111,10 @@ export function computePass(
 
 	encoder.copyTextureToTexture(
 		{
-			texture: state.computeOutTexture,
+			texture: res.computeOutTexture,
 		},
 		{
-			texture: state.computeInTexture,
+			texture: res.computeInTexture,
 		},
 		{
 			width: state.gridSize,

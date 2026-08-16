@@ -1,18 +1,15 @@
+import type { SimContext } from "../ca_sim";
 import type { Camera } from "./camera";
+import type { SimResources, SimState } from "./main";
 import shaderCode from "./shaders/render.wgsl?raw";
-import type { SimulationState } from "./state";
 
 let bindGroup: GPUBindGroup;
 let pipeline: GPURenderPipeline;
 
-export function initRender(
-	camera: Camera,
-	state: SimulationState,
-	canvasFormat: GPUTextureFormat,
-) {
-	const shaderModule = state.device.createShaderModule({ code: shaderCode });
+export function initRender(camera: Camera, ctx: SimContext, res: SimResources) {
+	const shaderModule = ctx.device.createShaderModule({ code: shaderCode });
 
-	const sampler = state.device.createSampler({
+	const sampler = ctx.device.createSampler({
 		label: "Render Sampler",
 		addressModeU: "repeat",
 		addressModeV: "repeat",
@@ -22,7 +19,7 @@ export function initRender(
 		1 * 4 + // f32 for zoom
 		2 * 4 + // 2 f32's for offset
 		1 * 4; // f32 for aspectRatio
-	const cameraStateBuffer = state.device.createBuffer({
+	const cameraStateBuffer = ctx.device.createBuffer({
 		label: "Camera Uniform Buffer",
 		size: cameraStateBufferSize,
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
@@ -36,7 +33,7 @@ export function initRender(
 		camera.aspectRatio,
 	]);
 
-	const bindGroupLayout = state.device.createBindGroupLayout({
+	const bindGroupLayout = ctx.device.createBindGroupLayout({
 		label: "Render Bind Group Layout",
 		entries: [
 			{
@@ -59,13 +56,13 @@ export function initRender(
 		],
 	});
 
-	bindGroup = state.device.createBindGroup({
+	bindGroup = ctx.device.createBindGroup({
 		label: "Render Bind Group",
 		layout: bindGroupLayout,
 		entries: [
 			{
 				binding: 0,
-				resource: state.computeOutTexture,
+				resource: res.computeOutTexture,
 			},
 			{
 				binding: 1,
@@ -85,25 +82,25 @@ export function initRender(
 			camera.offsetY,
 			camera.aspectRatio,
 		]);
-		state.device.queue.writeBuffer(cameraStateBuffer, 0, cameraStateValues);
+		ctx.device.queue.writeBuffer(cameraStateBuffer, 0, cameraStateValues);
 	}
 	// Initializing unform buffer on the GPU.
 	updateCameraBuffer();
 	camera.onChange = updateCameraBuffer;
 
-	const pipelineLayout = state.device.createPipelineLayout({
+	const pipelineLayout = ctx.device.createPipelineLayout({
 		label: "Render Pipeline Layout",
 		bindGroupLayouts: [bindGroupLayout],
 	});
 
-	pipeline = state.device.createRenderPipeline({
+	pipeline = ctx.device.createRenderPipeline({
 		label: "Render Pipeline",
 		layout: pipelineLayout,
 		vertex: { module: shaderModule, entryPoint: "vs_main" },
 		fragment: {
 			module: shaderModule,
 			entryPoint: "fs_main",
-			targets: [{ format: canvasFormat }],
+			targets: [{ format: ctx.format }],
 		},
 		primitive: {
 			topology: "triangle-list",
@@ -113,7 +110,6 @@ export function initRender(
 
 export function renderPass(
 	encoder: GPUCommandEncoder,
-	state: SimulationState,
 	context: GPUCanvasContext,
 ) {
 	const textureView = context.getCurrentTexture().createView();

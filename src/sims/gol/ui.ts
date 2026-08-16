@@ -1,8 +1,10 @@
 import GUI from "lil-gui";
 
+import type { SimParams } from "./main";
+
 const DEFAULT_TIMESTEP = 40;
 
-export const simParams = {
+export const simParams: SimParams = {
 	timestep: DEFAULT_TIMESTEP,
 	paused: false,
 };
