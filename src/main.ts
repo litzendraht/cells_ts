@@ -1,7 +1,7 @@
 import "./style.css";
 
-import type { SimContext } from "./sims/ca_sim";
 import { Sim } from "./sims/gol/main";
+import { SimContext } from "./sims/ca_sim";
 
 async function buildSimContext(): Promise<SimContext> {
 	if (!navigator.gpu) {
@@ -25,13 +25,27 @@ async function buildSimContext(): Promise<SimContext> {
 	const format = navigator.gpu.getPreferredCanvasFormat();
 	context.configure({ device, format });
 
+	// TODO figure out if this code does something.
+	// function resizeCanvas() {
+	// 	const dpr = window.devicePixelRatio || 1;
+	// 	const displayWidth = window.innerWidth;
+	// 	const displayHeight = window.innerHeight;
+
+	// 	canvas.width = displayWidth * dpr;
+	// 	canvas.height = displayHeight * dpr;
+	// }
+
+	// window.addEventListener("resize", () => {
+	// 	resizeCanvas();
+	// });
+
 	return {
 		window,
 		canvas,
 		format,
 		gpuContext: context,
 		device,
-	};
+	}
 }
 
 async function main() {
