@@ -1,4 +1,4 @@
-import { CASim, type SimContext } from "../ca_sim";
+import { CASim, type SimContext } from "../sim";
 import { Camera } from "./camera";
 import { computePass, initCompute, WORKGROUP_SIZE } from "./compute";
 import { initRender, renderPass } from "./render";
@@ -24,6 +24,7 @@ export interface SimParams {
 }
 
 export class Sim extends CASim {
+	static name = "Game of Life";
 	state: SimState;
 	params: SimParams;
 	// Shared storage for textures, used between stages.
@@ -31,7 +32,6 @@ export class Sim extends CASim {
 
 	constructor(ctx: SimContext) {
 		super(ctx);
-		this.name = "Game of Life";
 		this.state = {
 			gridSize: DEFAULT_GRID_SIZE,
 			lastFrameTime: performance.now(),

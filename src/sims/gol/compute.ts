@@ -1,4 +1,4 @@
-import type { SimContext } from "../ca_sim";
+import type { SimContext } from "../sim";
 import type { SimResources, SimState } from "./main";
 import shaderCode from "./shaders/compute.wgsl?raw";
 

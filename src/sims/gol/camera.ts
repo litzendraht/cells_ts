@@ -12,14 +12,20 @@ export class Camera {
 		private canvas: HTMLCanvasElement,
 		private window: Window,
 	) {
-		this.setupEvents();
+		this.setupEvents(window, canvas);
 	}
 
-	private setupEvents() {
+	private setupEvents(window: Window, canvas: HTMLCanvasElement) {
 		const resizeObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const { width, height } = entry.contentRect;
 				this.aspectRatio = height / width;
+
+				// Matching canvas width and height exactly to its physical size on the screen.
+				const dpr = window.devicePixelRatio || 1;
+				canvas.width = canvas.clientWidth * dpr;
+				canvas.height = canvas.clientHeight * dpr;
+
 				this.onChange();
 			}
 		});

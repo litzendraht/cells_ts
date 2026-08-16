@@ -7,7 +7,7 @@ export interface SimContext {
 }
 
 export abstract class CASim {
-	name: string = "Default Name";
+	static name: string = "Default Name";
 	protected ctx: SimContext;
 
 	constructor(ctx: SimContext) {

@@ -1,7 +1,7 @@
 import "./style.css";
 
 import { Sim } from "./sims/gol/main";
-import { SimContext } from "./sims/ca_sim";
+import type { SimContext } from "./sims/sim";
 
 async function buildSimContext(): Promise<SimContext> {
 	if (!navigator.gpu) {
@@ -45,7 +45,7 @@ async function buildSimContext(): Promise<SimContext> {
 		format,
 		gpuContext: context,
 		device,
-	}
+	};
 }
 
 async function main() {

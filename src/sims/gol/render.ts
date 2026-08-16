@@ -1,4 +1,4 @@
-import type { SimContext } from "../ca_sim";
+import type { SimContext } from "../sim";
 import type { Camera } from "./camera";
 import type { SimResources, SimState } from "./main";
 import shaderCode from "./shaders/render.wgsl?raw";
