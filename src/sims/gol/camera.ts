@@ -10,7 +10,7 @@ export class Camera {
 
 	constructor(
 		private canvas: HTMLCanvasElement,
-		private window: Window,
+		window: Window,
 	) {
 		this.setupEvents(window, canvas);
 	}

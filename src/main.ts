@@ -35,7 +35,7 @@ async function buildSimContext(): Promise<SimContext> {
 }
 
 async function main() {
-	const simContext: SimContext = await buildSimContext();
+	const simContext = await buildSimContext();
 	const sim = new Sim(simContext);
 
 	function frame() {
